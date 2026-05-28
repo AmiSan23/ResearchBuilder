@@ -1,0 +1,6 @@
+{
+  "name": "Research Builder",
+  "description": "A web application for drafting, previewing, and exporting journal research manuscripts with a side-by-side interactive split layout.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
