@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Builder</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fontsource@latest/inter/index.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --secondary: #64748b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --paper-bg: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: var(--primary);
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            min-width: 180px;
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.625rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text);
+            transition: background 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .dropdown-item svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 56px);
+            position: relative;
+        }
+
+        .input-panel {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg);
+            padding: 1.5rem;
+            min-width: 0;
+        }
+
+        .split-divider {
+            width: 6px;
+            background: var(--border);
+            cursor: col-resize;
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .split-divider:hover, .split-divider.active {
+            background: var(--primary);
+        }
+
+        .preview-panel {
+            flex: 1;
+            overflow-y: auto;
+            background: #e5e7eb;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        /* Mobile Layout */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .split-divider {
+                width: 100%;
+                height: 6px;
+                cursor: row-resize;
+            }
+
+            .input-panel {
+                padding: 1rem;
+            }
+
+            .preview-panel {
+                padding: 1rem;
+            }
+        }
+
+        /* Paper Preview */
+        .paper {
+            background: var(--paper-bg);
+            width: 100%;
+            max-width: 800px;
+            min-height: 1100px;
+            padding: 3rem;
+            box-shadow: var(--shadow-lg);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .paper-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .paper-abstract {
+            margin-bottom: 1.5rem;
+        }
+
+        .paper-abstract-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .paper-abstract-content {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            text-align: justify;
+        }
+
+        .paper-keywords {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .paper-keywords-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .paper-keywords-content {
+            font-size: 0.9375rem;
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .paper-section {
+            margin-bottom: 2rem;
+        }
+
+        .paper-section-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            color: var(--text);
+        }
+
+        .paper-subsection {
+            margin-bottom: 1rem;
+        }
+
+        .paper-subsection-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .paper-content {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+            color: var(--text-muted);
+            text-align: justify;
+            white-space: pre-wrap;
+        }
+
+        .paper-content:empty::after {
+            content: '...';
+            color: #cbd5e1;
+        }
+
+        /* Input Sections */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header {
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .section-header:hover {
+            background: var(--bg);
+        }
+
+        .section-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .section-badge {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.5rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+
+        .section-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-btn {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--secondary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: help;
+            position: relative;
+        }
+
+        .info-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .info-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 50;
+            max-width: 250px;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .info-btn:hover .info-tooltip {
+            opacity: 1;
+        }
+
+        .chevron {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.2s;
+            color: var(--secondary);
+        }
+
+        .section.collapsed .chevron {
+            transform: rotate(-90deg);
+        }
+
+        .section-body {
+            padding: 0 1.25rem 1.25rem;
+            display: block;
+        }
+
+        .section.collapsed .section-body {
+            display: none;
+        }
+
+        /* Tags Input */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            min-height: 40px;
+            cursor: text;
+        }
+
+        .tags-container:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 0.375rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+
+        .tag-remove:hover {
+            opacity: 1;
+        }
+
+        .tag-input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.875rem;
+            color: var(--text);
+            min-width: 100px;
+            flex: 1;
+        }
+
+        .tag-input::placeholder {
+            color: #cbd5e1;
+        }
+
+        /* Textarea & Input */
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            resize: vertical;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.input-field {
+            min-height: 80px;
+        }
+
+        .input-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Subsection in Input */
+        .input-subsection {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .input-subsection:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .input-subheader {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-subtitle {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Add Button */
+        .add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px dashed var(--border);
+            border-radius: 0.5rem;
+            background: transparent;
+            color: var(--secondary);
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .add-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .add-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .file-upload input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-icon {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .file-list {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border-radius: 0.375rem;
+            font-size: 0.8125rem;
+        }
+
+        .file-item-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+        }
+
+        .file-item-remove {
+            cursor: pointer;
+            color: var(--danger);
+            opacity: 0.7;
+            transition: opacity 0.15s;
+        }
+
+        .file-item-remove:hover {
+            opacity: 1;
+        }
+
+        /* Bibliography Entries */
+        .bib-entry {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bib-entry-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .bib-entry-fields .input-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .bib-entry .input-field {
+            padding: 0.5rem;
+            font-size: 0.8125rem;
+        }
+
+        /* Status indicator */
+        .save-status {
+            font-size: 0.75rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .save-status.saving {
+            color: var(--warning);
+        }
+
+        .save-status svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background: var(--text);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal h3 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-actions .btn-text {
+                display: none;
+            }
+            
+            .paper {
+                padding: 1.5rem;
+                font-size: 0.875rem;
+            }
+
+            .paper-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .header, .input-panel, .split-divider {
+                display: none !important;
+            }
+            
+            .preview-panel {
+                padding: 0;
+                background: white;
+            }
+            
+            .paper {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+
+        /* Conceptual framework image area */
+        .framework-placeholder {
+            border: 2px dashed var(--border);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .framework-placeholder:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .framework-img {
+            max-width: 100%;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Word count */
+        .word-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                <line x1="8" y1="6" x2="16" y2="6"/>
+                <line x1="8" y1="10" x2="14" y2="10"/>
+            </svg>
+            <span>Research Builder</span>
+        </div>
+        <div class="header-actions">
+            <span class="save-status" id="saveStatus">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+                Tersimpan
+            </span>
+            <button class="btn-icon" onclick="togglePreview()" title="Toggle Preview" id="previewToggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-secondary" onclick="toggleDropdown()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span class="btn-text">Ekspor</span>
+                </button>
+                <div class="dropdown-menu" id="exportDropdown">
+                    <div class="dropdown-item" onclick="exportAs('txt')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                        Ekspor sebagai .TXT
+                    </div>
+                    <div class="dropdown-item" onclick="exportAs('md')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Ekspor sebagai .MD
+                    </div>
+                    <div class="dropdown-item" onclick="exportAs('html')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/></svg>
+                        Ekspor sebagai .HTML
+                    </div>
+                    <div class="dropdown-item" onclick="window.print()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        Cetak / PDF
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="clearAll()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span class="btn-text">Reset</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        <!-- Input Panel -->
+        <div class="input-panel" id="inputPanel">
+            <!-- Title Section -->
+            <div class="section" data-section="title">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Judul Penelitian</span>
+                    </div>
+                    <div class="section-actions">
+                        <div class="info-btn">i
+                            <span class="info-tooltip">Masukkan judul penelitian yang jelas dan informatif</span>
+                        </div>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-group">
+                        <input type="text" class="input-field" id="titleInput" placeholder="Masukkan judul penelitian..." data-key="title">
+                    </div>
+                    <div class="tags-container" id="titleTags" onclick="document.getElementById('titleTagInput').focus()">
+                        <span class="tag">Metode <span class="tag-remove" onclick="removeTag(this, 'title')">×</span></span>
+                        <span class="tag">Variabel <span class="tag-remove" onclick="removeTag(this, 'title')">×</span></span>
+                        <span class="tag">Objek Masalah <span class="tag-remove" onclick="removeTag(this, 'title')">×</span></span>
+                        <input type="text" class="tag-input" id="titleTagInput" placeholder="Tambah tag... (Enter)" data-key="title-tags">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Abstract Section -->
+            <div class="section" data-section="abstract">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Abstrak</span>
+                    </div>
+                    <div class="section-actions">
+                        <div class="info-btn">i
+                            <span class="info-tooltip">Ringkasan singkat seluruh penelitian</span>
+                        </div>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Latar Belakang Masalah</span>
+                            <div class="info-btn">i<span class="info-tooltip">Deskripsi singkat konteks masalah</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-latar" placeholder="Latar belakang masalah..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Tujuan Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Tujuan utama penelitian ini</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-tujuan" placeholder="Tujuan penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Metodologi</span>
+                            <div class="info-btn">i<span class="info-tooltip">Pendekatan dan metode yang digunakan</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-metode" placeholder="Metodologi penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Sampel / Populasi</span>
+                            <div class="info-btn">i<span class="info-tooltip">Deskripsi sampel atau populasi penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-sampel" placeholder="Sampel / populasi..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Pengumpulan Data</span>
+                            <div class="info-btn">i<span class="info-tooltip">Teknik pengumpulan data</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-data" placeholder="Pengumpulan data..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Teknik Keabsahan Data</span>
+                            <div class="info-btn">i<span class="info-tooltip">Cara memastikan keabsahan data</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-keabsahan" placeholder="Teknik keabsahan data..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Variabel yang Diteliti</span>
+                            <div class="info-btn">i<span class="info-tooltip">Variabel-variabel dalam penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-variabel" placeholder="Variabel yang diteliti..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Subjek Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Subjek yang diteliti</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-subjek" placeholder="Subjek penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Tempat Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Lokasi penelitian dilaksanakan</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-tempat" placeholder="Tempat penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Periode Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Waktu pelaksanaan penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-periode" placeholder="Periode penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Hasil Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Hasil utama penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-hasil" placeholder="Hasil penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Temuan Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Temuan penting dari penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-temuan" placeholder="Temuan penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Kesimpulan</span>
+                            <div class="info-btn">i<span class="info-tooltip">Kesimpulan utama penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-kesimpulan" placeholder="Kesimpulan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Saran / Rekomendasi</span>
+                            <div class="info-btn">i<span class="info-tooltip">Saran berdasarkan temuan</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-saran" placeholder="Saran / rekomendasi..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Implikasi / Manfaat</span>
+                            <div class="info-btn">i<span class="info-tooltip">Manfaat dan implikasi penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="abstract-implikasi" placeholder="Implikasi / manfaat..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Keywords Section -->
+            <div class="section" data-section="keywords">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Kata Kunci</span>
+                    </div>
+                    <div class="section-actions">
+                        <div class="info-btn">i
+                            <span class="info-tooltip">Kata kunci utama penelitian (pisahkan dengan Enter)</span>
+                        </div>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="tags-container" id="keywordsTags" onclick="document.getElementById('keywordTagInput').focus()">
+                        <input type="text" class="tag-input" id="keywordTagInput" placeholder="Tambah kata kunci... (Enter)" data-key="keywords">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pendahuluan Section -->
+            <div class="section" data-section="pendahuluan">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Pendahuluan</span>
+                    </div>
+                    <div class="section-actions">
+                        <div class="info-btn">i
+                            <span class="info-tooltip">Bagian awal yang berisi latar belakang hingga sistematika penulisan</span>
+                        </div>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">1. Latar Belakang Masalah</span>
+                            <div class="info-btn">i<span class="info-tooltip">Jelaskan konteks dan urgensi masalah</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pendahuluan-latar" placeholder="Latar belakang masalah..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">2. Rumusan Masalah</span>
+                            <div class="info-btn">i<span class="info-tooltip">Pertanyaan penelitian yang akan dijawab</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pendahuluan-rumusan" placeholder="Rumusan masalah..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">3. Tujuan Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Tujuan yang ingin dicapai</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pendahuluan-tujuan" placeholder="Tujuan penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">4. Manfaat Penelitian</span>
+                            <div class="info-btn">i<span class="info-tooltip">Manfaat teoritis dan praktis</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pendahuluan-manfaat" placeholder="Manfaat penelitian..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">5. Ruang Lingkup dan Batasan</span>
+                            <div class="info-btn">i<span class="info-tooltip">Batasan-batasan penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pendahuluan-ruanglingkup" placeholder="Ruang lingkup dan batasan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">6. Sistematika Penulisan</span>
+                            <div class="info-btn">i<span class="info-tooltip">Struktur penulisan jurnal</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pendahuluan-sistematika" placeholder="Sistematika penulisan..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tinjauan Pustaka Section -->
+            <div class="section" data-section="pustaka">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Tinjauan Pustaka / Landasan Teori</span>
+                    </div>
+                    <div class="section-actions">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">1. Konsep / Definisi Dasar</span>
+                            <div class="info-btn">i<span class="info-tooltip">Definisi konsep-konsep kunci</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pustaka-konsep" placeholder="Konsep / definisi dasar..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">2. Teori yang Relevan</span>
+                            <div class="info-btn">i<span class="info-tooltip">Teori-teori pendukung penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pustaka-teori" placeholder="Teori yang relevan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">3. Kajian Terdahulu</span>
+                            <div class="info-btn">i<span class="info-tooltip">Penelitian-penelitian sebelumnya yang relevan</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pustaka-terdahulu" placeholder="Kajian terdahulu..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">4. Kerangka Konseptual</span>
+                            <div class="info-btn">i<span class="info-tooltip">Kerangka pemikiran penelitian</span></div>
+                        </div>
+                        <div class="framework-placeholder" id="frameworkUpload" onclick="document.getElementById('frameworkFileInput').click()">
+                            <input type="file" id="frameworkFileInput" accept="image/*" style="display:none" onchange="handleFrameworkImage(this)">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                            <div style="margin-top:0.5rem">Klik untuk upload gambar kerangka konseptual</div>
+                        </div>
+                        <img id="frameworkPreview" class="framework-img" style="display:none">
+                        <textarea class="input-field" data-key="pustaka-kerangka-penjelasan" placeholder="Penjelasan kerangka konseptual..." style="margin-top:0.5rem"></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">5. Hipotesis / Proposisi</span>
+                            <div class="info-btn">i<span class="info-tooltip">Dugaan sementara atau proposisi penelitian</span></div>
+                        </div>
+                        <textarea class="input-field" data-key="pustaka-hipotesis" placeholder="Hipotesis / proposisi..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metodologi Section -->
+            <div class="section" data-section="metodologi">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Metodologi Penelitian</span>
+                    </div>
+                    <div class="section-actions">
+                        <div class="info-btn">i
+                            <span class="info-tooltip">Metode penelitian yang digunakan (struktur bisa berbeda tergantung jenis metodologi)</span>
+                        </div>
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">1. Jenis dan Pendekatan Penelitian</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-jenis" placeholder="Jenis dan pendekatan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">2. Lokasi dan Waktu Penelitian</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-lokasi" placeholder="Lokasi dan waktu..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">3. Subjek / Informan Penelitian</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-subjek" placeholder="Subjek / informan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">4. Teknik Pengumpulan Data</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-pengumpulan" placeholder="Teknik pengumpulan data..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">5. Teknik Analisis Data</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-analisis" placeholder="Teknik analisis data..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">6. Teknik Keabsahan</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-keabsahan" placeholder="Teknik keabsahan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">7. Etika Penelitian</span>
+                        </div>
+                        <textarea class="input-field" data-key="metodologi-etika" placeholder="Etika penelitian..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hasil Penelitian Section -->
+            <div class="section" data-section="hasil">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Hasil Penelitian</span>
+                    </div>
+                    <div class="section-actions">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">1. Gambaran Umum Hasil Penelitian</span>
+                        </div>
+                        <textarea class="input-field" data-key="hasil-gambaran" placeholder="Gambaran umum hasil..."></textarea>
+                    </div>
+                    <div id="hasilTemaContainer">
+                        <div class="input-subsection">
+                            <div class="input-subheader">
+                                <span class="input-subtitle">2. Temuan per Unit Analisis / Tema</span>
+                            </div>
+                            <textarea class="input-field" data-key="hasil-tema" placeholder="Temuan per tema..."></textarea>
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addTema()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Tambah Tema
+                    </button>
+                    <div class="input-subsection" style="margin-top:1rem">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">3. Temuan Pendukung</span>
+                        </div>
+                        <textarea class="input-field" data-key="hasil-pendukung" placeholder="Temuan pendukung..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">4. Hubungan Antar Temuan</span>
+                        </div>
+                        <textarea class="input-field" data-key="hasil-hubungan" placeholder="Hubungan antar temuan..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pembahasan Section -->
+            <div class="section" data-section="pembahasan">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Pembahasan</span>
+                    </div>
+                    <div class="section-actions">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">1. Interpretasi Temuan Utama</span>
+                        </div>
+                        <textarea class="input-field" data-key="bahas-interpretasi" placeholder="Interpretasi temuan utama..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">2. Perbandingan Kajian Terdahulu</span>
+                        </div>
+                        <textarea class="input-field" data-key="bahas-perbandingan" placeholder="Perbandingan dengan kajian terdahulu..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">3. Penjelasan dengan Landasan Teori</span>
+                        </div>
+                        <textarea class="input-field" data-key="bahas-teori" placeholder="Penjelasan dengan teori..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">4. Faktor Penghambat dan Pendukung</span>
+                        </div>
+                        <textarea class="input-field" data-key="bahas-faktor" placeholder="Faktor penghambat dan pendukung..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">5. Implikasi Temuan</span>
+                        </div>
+                        <textarea class="input-field" data-key="bahas-implikasi" placeholder="Implikasi temuan..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">6. Keterbatasan Penelitian</span>
+                        </div>
+                        <textarea class="input-field" data-key="bahas-keterbatasan" placeholder="Keterbatasan penelitian..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kesimpulan dan Saran Section -->
+            <div class="section" data-section="kesimpulan">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Kesimpulan dan Saran</span>
+                    </div>
+                    <div class="section-actions">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Kesimpulan Umum</span>
+                        </div>
+                        <textarea class="input-field" data-key="kesimpulan-umum" placeholder="Kesimpulan umum..."></textarea>
+                    </div>
+                    <div id="kesimpulanRumusanContainer">
+                        <div class="input-subsection">
+                            <div class="input-subheader">
+                                <span class="input-subtitle">Kesimpulan per Rumusan Masalah</span>
+                            </div>
+                            <textarea class="input-field" data-key="kesimpulan-rumusan" placeholder="Kesimpulan per rumusan masalah..."></textarea>
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addRumusanKesimpulan()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Tambah Rumusan Masalah
+                    </button>
+                    <div class="input-subsection" style="margin-top:1rem">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Saran Praktis</span>
+                        </div>
+                        <textarea class="input-field" data-key="saran-praktis" placeholder="Saran praktis..."></textarea>
+                    </div>
+                    <div class="input-subsection">
+                        <div class="input-subheader">
+                            <span class="input-subtitle">Saran Penelitian Lanjutan</span>
+                        </div>
+                        <textarea class="input-field" data-key="saran-lanjutan" placeholder="Saran untuk penelitian lanjutan..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daftar Pustaka Section -->
+            <div class="section" data-section="pustaka-list">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Daftar Pustaka</span>
+                    </div>
+                    <div class="section-actions">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div id="bibContainer"></div>
+                    <button class="add-btn" onclick="addBibEntry()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Tambah Referensi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lampiran Section -->
+            <div class="section" data-section="lampiran">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <div class="section-title-group">
+                        <span class="section-title">Lampiran</span>
+                    </div>
+                    <div class="section-actions">
+                        <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,9 12,15 18,9"/></svg>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="file-upload" id="lampiranUpload">
+                        <input type="file" multiple onchange="handleLampiranFiles(this)" accept="*/*">
+                        <svg class="file-upload-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <div class="file-upload-text">Klik atau drag file ke sini untuk upload lampiran</div>
+                    </div>
+                    <div class="file-list" id="lampiranFileList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Split Divider -->
+        <div class="split-divider" id="splitDivider"></div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel" id="previewPanel">
+            <div class="paper" id="paperPreview">
+                <div class="paper-title" id="previewTitle">Judul Penelitian</div>
+                <div class="paper-abstract">
+                    <div class="paper-abstract-label">Abstrak</div>
+                    <div class="paper-abstract-content" id="previewAbstract"></div>
+                </div>
+                <div class="paper-keywords">
+                    <span class="paper-keywords-label">Kata Kunci: </span>
+                    <span class="paper-keywords-content" id="previewKeywords"></span>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Pendahuluan</div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">1. Latar Belakang Masalah</div>
+                        <div class="paper-content" id="preview-pendahuluan-latar"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">2. Rumusan Masalah</div>
+                        <div class="paper-content" id="preview-pendahuluan-rumusan"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">3. Tujuan Penelitian</div>
+                        <div class="paper-content" id="preview-pendahuluan-tujuan"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">4. Manfaat Penelitian</div>
+                        <div class="paper-content" id="preview-pendahuluan-manfaat"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">5. Ruang Lingkup dan Batasan</div>
+                        <div class="paper-content" id="preview-pendahuluan-ruanglingkup"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">6. Sistematika Penulisan</div>
+                        <div class="paper-content" id="preview-pendahuluan-sistematika"></div>
+                    </div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Tinjauan Pustaka / Landasan Teori</div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">1. Konsep / Definisi Dasar</div>
+                        <div class="paper-content" id="preview-pustaka-konsep"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">2. Teori yang Relevan</div>
+                        <div class="paper-content" id="preview-pustaka-teori"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">3. Kajian Terdahulu</div>
+                        <div class="paper-content" id="preview-pustaka-terdahulu"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">4. Kerangka Konseptual</div>
+                        <div id="previewFrameworkImg"></div>
+                        <div class="paper-content" id="preview-pustaka-kerangka-penjelasan"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">5. Hipotesis / Proposisi</div>
+                        <div class="paper-content" id="preview-pustaka-hipotesis"></div>
+                    </div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Metodologi Penelitian</div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">1. Jenis dan Pendekatan Penelitian</div>
+                        <div class="paper-content" id="preview-metodologi-jenis"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">2. Lokasi dan Waktu Penelitian</div>
+                        <div class="paper-content" id="preview-metodologi-lokasi"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">3. Subjek / Informan Penelitian</div>
+                        <div class="paper-content" id="preview-metodologi-subjek"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">4. Teknik Pengumpulan Data</div>
+                        <div class="paper-content" id="preview-metodologi-pengumpulan"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">5. Teknik Analisis Data</div>
+                        <div class="paper-content" id="preview-metodologi-analisis"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">6. Teknik Keabsahan</div>
+                        <div class="paper-content" id="preview-metodologi-keabsahan"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">7. Etika Penelitian</div>
+                        <div class="paper-content" id="preview-metodologi-etika"></div>
+                    </div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Hasil Penelitian</div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">1. Gambaran Umum Hasil Penelitian</div>
+                        <div class="paper-content" id="preview-hasil-gambaran"></div>
+                    </div>
+                    <div id="previewTemaContainer"></div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">3. Temuan Pendukung</div>
+                        <div class="paper-content" id="preview-hasil-pendukung"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">4. Hubungan Antar Temuan</div>
+                        <div class="paper-content" id="preview-hasil-hubungan"></div>
+                    </div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Pembahasan</div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">1. Interpretasi Temuan Utama</div>
+                        <div class="paper-content" id="preview-bahas-interpretasi"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">2. Perbandingan Kajian Terdahulu</div>
+                        <div class="paper-content" id="preview-bahas-perbandingan"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">3. Penjelasan dengan Landasan Teori</div>
+                        <div class="paper-content" id="preview-bahas-teori"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">4. Faktor Penghambat dan Pendukung</div>
+                        <div class="paper-content" id="preview-bahas-faktor"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">5. Implikasi Temuan</div>
+                        <div class="paper-content" id="preview-bahas-implikasi"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">6. Keterbatasan Penelitian</div>
+                        <div class="paper-content" id="preview-bahas-keterbatasan"></div>
+                    </div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Kesimpulan dan Saran</div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">Kesimpulan Umum</div>
+                        <div class="paper-content" id="preview-kesimpulan-umum"></div>
+                    </div>
+                    <div id="previewKesimpulanRumusan"></div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">Saran Praktis</div>
+                        <div class="paper-content" id="preview-saran-praktis"></div>
+                    </div>
+                    <div class="paper-subsection">
+                        <div class="paper-subsection-title">Saran Penelitian Lanjutan</div>
+                        <div class="paper-content" id="preview-saran-lanjutan"></div>
+                    </div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Daftar Pustaka</div>
+                    <div id="previewBib"></div>
+                </div>
+
+                <div class="paper-section">
+                    <div class="paper-section-title">Lampiran</div>
+                    <div id="previewLampiran"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
+        <span id="toastMessage">Berhasil!</span>
+    </div>
+
+    <!-- Reset Modal -->
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal">
+            <h3>Reset Semua Data?</h3>
+            <p>Tindakan ini akan menghapus semua data yang telah Anda isi. Pastikan Anda sudah mengekspor data jika diperlukan.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeResetModal()">Batal</button>
+                <button class="btn btn-primary" onclick="confirmReset()">Ya, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================== STATE =====================
+        let temaCounter = 1;
+        let rumusanCounter = 1;
+        let bibCounter = 0;
+        let lampiranFiles = [];
+        let frameworkImage = null;
+        let saveTimeout = null;
+
+        // ===================== INIT =====================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            setupEventListeners();
+            setupSplitDivider();
+            updatePreview();
+        });
+
+        // ===================== EVENT LISTENERS =====================
+        function setupEventListeners() {
+            // Input changes
+            document.querySelectorAll('.input-field').forEach(input => {
+                input.addEventListener('input', () => {
+                    updatePreview();
+                    autoSave();
+                });
+            });
+
+            // Tag inputs
+            document.querySelectorAll('.tag-input').forEach(input => {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag(e.target);
+                    }
+                });
+            });
+
+            // Close dropdown on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown')) {
+                    document.getElementById('exportDropdown').classList.remove('show');
+                }
+            });
+        }
+
+        // ===================== SECTION TOGGLE =====================
+        function toggleSection(header) {
+            const section = header.closest('.section');
+            section.classList.toggle('collapsed');
+        }
+
+        // ===================== TAGS =====================
+        function addTag(input) {
+            const value = input.value.trim();
+            if (!value) return;
+
+            const container = input.parentElement;
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            
+            const containerId = container.id;
+            tag.innerHTML = `${value} <span class="tag-remove" onclick="removeTag(this, '${containerId}')">×</span>`;
+            
+            container.insertBefore(tag, input);
+            input.value = '';
+            
+            saveTags();
+            updatePreview();
+            autoSave();
+        }
+
+        function removeTag(el, containerId) {
+            el.parentElement.remove();
+            saveTags();
+            updatePreview();
+            autoSave();
+        }
+
+        function saveTags() {
+            const data = {};
+            document.querySelectorAll('.tags-container').forEach(container => {
+                const tags = [];
+                container.querySelectorAll('.tag').forEach(tag => {
+                    tags.push(tag.textContent.replace('×', '').trim());
+                });
+                data[container.id] = tags;
+            });
+            localStorage.setItem('rb_tags', JSON.stringify(data));
+        }
+
+        function loadTags() {
+            const data = JSON.parse(localStorage.getItem('rb_tags') || '{}');
+            Object.keys(data).forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                const input = container.querySelector('.tag-input');
+                data[containerId].forEach(tagText => {
+                    if (!tagText) return;
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.innerHTML = `${tagText} <span class="tag-remove" onclick="removeTag(this, '${containerId}')">×</span>`;
+                    container.insertBefore(tag, input);
+                });
+            });
+        }
+
+        // ===================== SPLIT DIVIDER =====================
+        function setupSplitDivider() {
+            const divider = document.getElementById('splitDivider');
+            const container = document.getElementById('mainContainer');
+            const inputPanel = document.getElementById('inputPanel');
+            const previewPanel = document.getElementById('previewPanel');
+            let isDragging = false;
+
+            divider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                divider.classList.add('active');
+                document.body.style.cursor = window.innerWidth > 768 ? 'col-resize' : 'row-resize';
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                if (window.innerWidth > 768) {
+                    const containerRect = container.getBoundingClientRect();
+                    const percentage = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                    const clamped = Math.max(20, Math.min(80, percentage));
+                    inputPanel.style.flex = `0 0 ${clamped}%`;
+                    previewPanel.style.flex = `0 0 ${100 - clamped}%`;
+                } else {
+                    const containerRect = container.getBoundingClientRect();
+                    const percentage = ((e.clientY - containerRect.top) / containerRect.height) * 100;
+                    const clamped = Math.max(20, Math.min(80, percentage));
+                    inputPanel.style.flex = `0 0 ${clamped}%`;
+                    previewPanel.style.flex = `0 0 ${100 - clamped}%`;
+                }
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                divider.classList.remove('active');
+                document.body.style.cursor = '';
+            });
+
+            // Touch support
+            divider.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                divider.classList.add('active');
+                e.preventDefault();
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                
+                if (window.innerWidth > 768) {
+                    const containerRect = container.getBoundingClientRect();
+                    const percentage = ((touch.clientX - containerRect.left) / containerRect.width) * 100;
+                    const clamped = Math.max(20, Math.min(80, percentage));
+                    inputPanel.style.flex = `0 0 ${clamped}%`;
+                    previewPanel.style.flex = `0 0 ${100 - clamped}%`;
+                } else {
+                    const containerRect = container.getBoundingClientRect();
+                    const percentage = ((touch.clientY - containerRect.top) / containerRect.height) * 100;
+                    const clamped = Math.max(20, Math.min(80, percentage));
+                    inputPanel.style.flex = `0 0 ${clamped}%`;
+                    previewPanel.style.flex = `0 0 ${100 - clamped}%`;
+                }
+            });
+
+            document.addEventListener('touchend', () => {
+                isDragging = false;
+                divider.classList.remove('active');
+            });
+        }
+
+        // ===================== PREVIEW UPDATE =====================
+        function updatePreview() {
+            // Title
+            const title = document.getElementById('titleInput').value || 'Judul Penelitian';
+            document.getElementById('previewTitle').textContent = title;
+
+            // Abstract
+            const abstractFields = [
+                'abstract-latar', 'abstract-tujuan', 'abstract-metode', 'abstract-sampel',
+                'abstract-data', 'abstract-keabsahan', 'abstract-variabel', 'abstract-subjek',
+                'abstract-tempat', 'abstract-periode', 'abstract-hasil', 'abstract-temuan',
+                'abstract-kesimpulan', 'abstract-saran', 'abstract-implikasi'
+            ];
+
+            const abstractTexts = abstractFields.map(key => {
+                const el = document.querySelector(`[data-key="${key}"]`);
+                return el ? el.value : '';
+            }).filter(t => t.trim());
+
+            document.getElementById('previewAbstract').textContent = abstractTexts.join(' ');
+
+            // Keywords
+            const keywordTags = [];
+            document.querySelectorAll('#keywordsTags .tag').forEach(tag => {
+                keywordTags.push(tag.textContent.replace('×', '').trim());
+            });
+            document.getElementById('previewKeywords').textContent = keywordTags.join('; ');
+
+            // All other fields
+            document.querySelectorAll('.input-field[data-key]').forEach(input => {
+                const key = input.dataset.key;
+                const previewEl = document.getElementById(`preview-${key}`);
+                if (previewEl) {
+                    previewEl.textContent = input.value;
+                }
+            });
+
+            // Tema
+            updateTemaPreview();
+            
+            // Rumusan Kesimpulan
+            updateRumusanKesimpulanPreview();
+
+            // Bibliography
+            updateBibPreview();
+
+            // Lampiran
+            updateLampiranPreview();
+
+            // Framework image
+            if (frameworkImage) {
+                document.getElementById('previewFrameworkImg').innerHTML = `<img src="${frameworkImage}" style="max-width:100%;margin:0.5rem 0;border-radius:0.25rem">`;
+            }
+        }
+
+        // ===================== TEMA =====================
+        let temaCount = 1;
+        function addTema() {
+            temaCount++;
+            const container = document.getElementById('hasilTemaContainer');
+            const div = document.createElement('div');
+            div.className = 'input-subsection';
+            div.innerHTML = `
+                <div class="input-subheader">
+                    <span class="input-subtitle">${temaCount}. Tema Tambahan</span>
+                    <button class="btn-icon" onclick="this.closest('.input-subsection').remove();updatePreview();autoSave();" style="padding:0.25rem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <textarea class="input-field" data-key="hasil-tema-${temaCount}" placeholder="Temuan tema tambahan ${temaCount}..."></textarea>
+            `;
+            container.appendChild(div);
+            
+            div.querySelector('textarea').addEventListener('input', () => {
+                updatePreview();
+                autoSave();
+            });
+            
+            updatePreview();
+            autoSave();
+        }
+
+        function updateTemaPreview() {
+            const container = document.getElementById('previewTemaContainer');
+            let html = '';
+            let idx = 2;
+            
+            document.querySelectorAll('[data-key^="hasil-tema-"]').forEach((input, i) => {
+                const val = input.value;
+                if (val.trim()) {
+                    html += `
+                        <div class="paper-subsection">
+                            <div class="paper-subsection-title">${idx}. ${input.dataset.key.replace('hasil-tema-', 'Tema ').replace(/-/g, ' ')}</div>
+                            <div class="paper-content">${val}</div>
+                        </div>
+                    `;
+                    idx++;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // ===================== RUMUSAN KESIMPULAN =====================
+        let rumusanCount = 1;
+        function addRumusanKesimpulan() {
+            rumusanCount++;
+            const container = document.getElementById('kesimpulanRumusanContainer');
+            const div = document.createElement('div');
+            div.className = 'input-subsection';
+            div.innerHTML = `
+                <div class="input-subheader">
+                    <span class="input-subtitle">Kesimpulan Rumusan Masalah ${rumusanCount}</span>
+                    <button class="btn-icon" onclick="this.closest('.input-subsection').remove();updatePreview();autoSave();" style="padding:0.25rem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <textarea class="input-field" data-key="kesimpulan-rumusan-${rumusanCount}" placeholder="Kesimpulan rumusan masalah ${rumusanCount}..."></textarea>
+            `;
+            container.appendChild(div);
+            
+            div.querySelector('textarea').addEventListener('input', () => {
+                updatePreview();
+                autoSave();
+            });
+            
+            updatePreview();
+            autoSave();
+        }
+
+        function updateRumusanKesimpulanPreview() {
+            const container = document.getElementById('previewKesimpulanRumusan');
+            let html = '';
+            let idx = 1;
+            
+            document.querySelectorAll('[data-key^="kesimpulan-rumusan-"]').forEach(input => {
+                const val = input.value;
+                if (val.trim()) {
+                    html += `
+                        <div class="paper-subsection">
+                            <div class="paper-subsection-title">Kesimpulan Rumusan Masalah ${idx}</div>
+                            <div class="paper-content">${val}</div>
+                        </div>
+                    `;
+                    idx++;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // ===================== BIBLIOGRAPHY =====================
+        function addBibEntry() {
+            bibCounter++;
+            const container = document.getElementById('bibContainer');
+            const div = document.createElement('div');
+            div.className = 'bib-entry';
+            div.innerHTML = `
+                <div class="input-subheader" style="margin-bottom:0.5rem">
+                    <span class="input-subtitle">Referensi #${bibCounter}</span>
+                    <button class="btn-icon" onclick="this.closest('.bib-entry').remove();updateBibPreview();autoSave();" style="padding:0.25rem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+                <div class="bib-entry-fields">
+                    <div class="input-group">
+                        <label class="input-label">Penulis</label>
+                        <input type="text" class="input-field" data-key="bib-penulis-${bibCounter}" placeholder="Nama penulis">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Tahun</label>
+                        <input type="text" class="input-field" data-key="bib-tahun-${bibCounter}" placeholder="Tahun">
+                    </div>
+                    <div class="input-group full-width">
+                        <label class="input-label">Judul</label>
+                        <input type="text" class="input-field" data-key="bib-judul-${bibCounter}" placeholder="Judul karya">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Penerbit / Jurnal</label>
+                        <input type="text" class="input-field" data-key="bib-penerbit-${bibCounter}" placeholder="Penerbit">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Halaman</label>
+                        <input type="text" class="input-field" data-key="bib-hal-${bibCounter}" placeholder="Halaman">
+                    </div>
+                    <div class="input-group full-width">
+                        <label class="input-label">Link</label>
+                        <input type="text" class="input-field" data-key="bib-link-${bibCounter}" placeholder="URL / DOI">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            
+            div.querySelectorAll('.input-field').forEach(input => {
+                input.addEventListener('input', () => {
+                    updateBibPreview();
+                    autoSave();
+                });
+            });
+            
+            autoSave();
+        }
+
+        function updateBibPreview() {
+            const container = document.getElementById('previewBib');
+            let html = '<ol style="padding-left:1.5rem;font-size:0.9375rem;line-height:1.7;color:var(--text-muted)">';
+            
+            for (let i = 1; i <= bibCounter; i++) {
+                const penulis = document.querySelector(`[data-key="bib-penulis-${i}"]`)?.value || '';
+                const tahun = document.querySelector(`[data-key="bib-tahun-${i}"]`)?.value || '';
+                const judul = document.querySelector(`[data-key="bib-judul-${i}"]`)?.value || '';
+                const penerbit = document.querySelector(`[data-key="bib-penerbit-${i}"]`)?.value || '';
+                const hal = document.querySelector(`[data-key="bib-hal-${i}"]`)?.value || '';
+                const link = document.querySelector(`[data-key="bib-link-${i}"]`)?.value || '';
+                
+                if (penulis || judul) {
+                    let citation = '';
+                    if (penulis) citation += `${penulis}. `;
+                    if (tahun) citation += `(${tahun}). `;
+                    if (judul) citation += `<em>${judul}</em>. `;
+                    if (penerbit) citation += `${penerbit}. `;
+                    if (hal) citation += `hlm. ${hal}. `;
+                    if (link) citation += `<br><a href="${link}" style="color:var(--primary)">${link}</a>`;
+                    
+                    if (citation) {
+                        html += `<li>${citation}</li>`;
+                    }
+                }
+            }
+            
+            html += '</ol>';
+            container.innerHTML = html;
+        }
+
+        // ===================== LAMPIRAN =====================
+        function handleLampiranFiles(input) {
+            const files = Array.from(input.files);
+            files.forEach(file => {
+                lampiranFiles.push(file);
+            });
+            updateLampiranList();
+            updateLampiranPreview();
+            autoSave();
+        }
+
+        function updateLampiranList() {
+            const container = document.getElementById('lampiranFileList');
+            let html = '';
+            
+            lampiranFiles.forEach((file, idx) => {
+                html += `
+                    <div class="file-item">
+                        <span class="file-item-name">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                            ${file.name}
+                        </span>
+                        <span class="file-item-remove" onclick="removeLampiran(${idx})">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </span>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function removeLampiran(idx) {
+            lampiranFiles.splice(idx, 1);
+            updateLampiranList();
+            updateLampiranPreview();
+            autoSave();
+        }
+
+        function updateLampiranPreview() {
+            const container = document.getElementById('previewLampiran');
+            let html = '';
+            
+            if (lampiranFiles.length === 0) {
+                html = '<div class="empty-state">Belum ada lampiran</div>';
+            } else {
+                html = '<ul style="padding-left:1.5rem;font-size:0.9375rem;line-height:1.7;color:var(--text-muted)">';
+                lampiranFiles.forEach(file => {
+                    html += `<li>${file.name}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        // ===================== FRAMEWORK IMAGE =====================
+        function handleFrameworkImage(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                frameworkImage = e.target.result;
+                document.getElementById('frameworkPreview').src = frameworkImage;
+                document.getElementById('frameworkPreview').style.display = 'block';
+                document.getElementById('frameworkUpload').style.display = 'none';
+                updatePreview();
+                autoSave();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ===================== LOCAL STORAGE =====================
+        function autoSave() {
+            const status = document.getElementById('saveStatus');
+            status.className = 'save-status saving';
+            status.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Menyimpan...`;
+            
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveToStorage();
+                status.className = 'save-status';
+                status.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg> Tersimpan`;
+            }, 500);
+        }
+
+        function saveToStorage() {
+            const data = {};
+            
+            // Save all input fields
+            document.querySelectorAll('[data-key]').forEach(el => {
+                if (el.classList.contains('tag-input')) return;
+                data[el.dataset.key] = el.value;
+            });
+            
+            // Save textarea values
+            document.querySelectorAll('textarea[data-key]').forEach(el => {
+                data[el.dataset.key] = el.value;
+            });
+            
+            localStorage.setItem('rb_data', JSON.stringify(data));
+            saveTags();
+        }
+
+        function loadFromStorage() {
+            // Load input data
+            const data = JSON.parse(localStorage.getItem('rb_data') || '{}');
+            Object.keys(data).forEach(key => {
+                const el = document.querySelector(`[data-key="${key}"]`);
+                if (el) {
+                    el.value = data[key];
+                }
+            });
+            
+            // Load tags
+            loadTags();
+            
+            // Load counters
+            temaCount = Object.keys(data).filter(k => k.startsWith('hasil-tema-')).length;
+            rumusanCount = Object.keys(data).filter(k => k.startsWith('kesimpulan-rumusan-')).length;
+            bibCounter = Math.max(0, ...Object.keys(data).filter(k => k.startsWith('bib-penulis-')).map(k => parseInt(k.split('-').pop())));
+            
+            // Recreate dynamic entries
+            if (bibCounter > 0) {
+                for (let i = 1; i <= bibCounter; i++) {
+                    addBibEntry();
+                }
+                // Re-populate values
+                Object.keys(data).forEach(key => {
+                    const el = document.querySelector(`[data-key="${key}"]`);
+                    if (el) el.value = data[key];
+                });
+            }
+            
+            // Recreate tema entries
+            for (let i = 2; i <= temaCount; i++) {
+                addTema();
+            }
+            
+            // Recreate rumusan entries
+            for (let i = 2; i <= rumusanCount; i++) {
+                addRumusanKesimpulan();
+            }
+        }
+
+        // ===================== EXPORT FUNCTIONS =====================
+        function toggleDropdown() {
+            document.getElementById('exportDropdown').classList.toggle('show');
+        }
+
+        function exportAs(format) {
+            document.getElementById('exportDropdown').classList.remove('show');
+            
+            const title = document.getElementById('titleInput').value || 'Judul Penelitian';
+            let content = '';
+            let filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}.${format}`;
+            let mimeType = 'text/plain';
+            
+            if (format === 'txt') {
+                content = exportTXT();
+                mimeType = 'text/plain';
+            } else if (format === 'md') {
+                content = exportMD();
+                mimeType = 'text/markdown';
+            } else if (format === 'html') {
+                content = exportHTML();
+                mimeType = 'text/html';
+            }
+            
+            const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast(`Berhasil mengekspor sebagai .${format.toUpperCase()}`);
+        }
+
+        function getValue(key) {
+            const el = document.querySelector(`[data-key="${key}"]`);
+            return el ? el.value : '';
+        }
+
+        function exportTXT() {
+            let text = '';
+            const title = getValue('title') || 'Judul Penelitian';
+            
+            text += `${title}\n${'='.repeat(title.length)}\n\n`;
+            
+            // Keywords
+            const keywords = [];
+            document.querySelectorAll('#keywordsTags .tag').forEach(tag => {
+                keywords.push(tag.textContent.replace('×', '').trim());
+            });
+            if (keywords.length) text += `Kata Kunci: ${keywords.join('; ')}\n\n`;
+            
+            // Abstract
+            text += 'ABSTRAK\n';
+            text += '-'.repeat(7) + '\n';
+            const abstractFields = ['abstract-latar', 'abstract-tujuan', 'abstract-metode', 'abstract-sampel', 'abstract-data', 'abstract-keabsahan', 'abstract-variabel', 'abstract-subjek', 'abstract-tempat', 'abstract-periode', 'abstract-hasil', 'abstract-temuan', 'abstract-kesimpulan', 'abstract-saran', 'abstract-implikasi'];
+            abstractFields.forEach(key => {
+                const val = getValue(key);
+                if (val) text += val + '\n';
+            });
+            text += '\n\n';
+            
+            // Sections
+            const sections = [
+                { name: 'PENDAHULUAN', keys: ['pendahuluan-latar', 'pendahuluan-rumusan', 'pendahuluan-tujuan', 'pendahuluan-manfaat', 'pendahuluan-ruanglingkup', 'pendahuluan-sistematika'] },
+                { name: 'TINJAUAN PUSTAKA / LANDASAN TEORI', keys: ['pustaka-konsep', 'pustaka-teori', 'pustaka-terdahulu', 'pustaka-kerangka-penjelasan', 'pustaka-hipotesis'] },
+                { name: 'METODOLOGI PENELITIAN', keys: ['metodologi-jenis', 'metodologi-lokasi', 'metodologi-subjek', 'metodologi-pengumpulan', 'metodologi-analisis', 'metodologi-keabsahan', 'metodologi-etika'] },
+                { name: 'HASIL PENELITIAN', keys: ['hasil-gambaran', 'hasil-tema', 'hasil-pendukung', 'hasil-hubungan'] },
+                { name: 'PEMBAHASAN', keys: ['bahas-interpretasi', 'bahas-perbandingan', 'bahas-teori', 'bahas-faktor', 'bahas-implikasi', 'bahas-keterbatasan'] },
+                { name: 'KESIMPULAN DAN SARAN', keys: ['kesimpulan-umum', 'kesimpulan-rumusan', 'saran-praktis', 'saran-lanjutan'] }
+            ];
+            
+            sections.forEach(section => {
+                text += `\n${section.name}\n`;
+                text += '-'.repeat(section.name.length) + '\n';
+                section.keys.forEach(key => {
+                    const val = getValue(key);
+                    if (val) text += val + '\n\n';
+                });
+            });
+            
+            // Bibliography
+            text += '\nDAFTAR PUSTAKA\n';
+            text += '-'.repeat(14) + '\n';
+            for (let i = 1; i <= bibCounter; i++) {
+                const penulis = getValue(`bib-penulis-${i}`);
+                const tahun = getValue(`bib-tahun-${i}`);
+                const judul = getValue(`bib-judul-${i}`);
+                if (penulis || judul) {
+                    text += `${penulis}. (${tahun}). ${judul}. ${getValue(`bib-penerbit-${i}`)}. hlm. ${getValue(`bib-hal-${i}`)}.\n`;
+                }
+            }
+            
+            // Lampiran
+            if (lampiranFiles.length) {
+                text += '\nLAMPIRAN\n';
+                text += '-'.repeat(8) + '\n';
+                lampiranFiles.forEach(f => text += `- ${f.name}\n`);
+            }
+            
+            return text;
+        }
+
+        function exportMD() {
+            let md = '';
+            const title = getValue('title') || 'Judul Penelitian';
+            
+            md += `# ${title}\n\n`;
+            
+            // Keywords
+            const keywords = [];
+            document.querySelectorAll('#keywordsTags .tag').forEach(tag => {
+                keywords.push(tag.textContent.replace('×', '').trim());
+            });
+            if (keywords.length) md += `**Kata Kunci:** ${keywords.join('; ')}\n\n`;
+            
+            // Abstract
+            md += `## Abstrak\n\n`;
+            const abstractFields = ['abstract-latar', 'abstract-tujuan', 'abstract-metode', 'abstract-sampel', 'abstract-data', 'abstract-keabsahan', 'abstract-variabel', 'abstract-subjek', 'abstract-tempat', 'abstract-periode', 'abstract-hasil', 'abstract-temuan', 'abstract-kesimpulan', 'abstract-saran', 'abstract-implikasi'];
+            abstractFields.forEach(key => {
+                const val = getValue(key);
+                if (val) md += val + '\n\n';
+            });
+            
+            // Sections
+            const sections = [
+                { name: 'Pendahuluan', keys: ['pendahuluan-latar', 'pendahuluan-rumusan', 'pendahuluan-tujuan', 'pendahuluan-manfaat', 'pendahuluan-ruanglingkup', 'pendahuluan-sistematika'] },
+                { name: 'Tinjauan Pustaka / Landasan Teori', keys: ['pustaka-konsep', 'pustaka-teori', 'pustaka-terdahulu', 'pustaka-kerangka-penjelasan', 'pustaka-hipotesis'] },
+                { name: 'Metodologi Penelitian', keys: ['metodologi-jenis', 'metodologi-lokasi', 'metodologi-subjek', 'metodologi-pengumpulan', 'metodologi-analisis', 'metodologi-keabsahan', 'metodologi-etika'] },
+                { name: 'Hasil Penelitian', keys: ['hasil-gambaran', 'hasil-tema', 'hasil-pendukung', 'hasil-hubungan'] },
+                { name: 'Pembahasan', keys: ['bahas-interpretasi', 'bahas-perbandingan', 'bahas-teori', 'bahas-faktor', 'bahas-implikasi', 'bahas-keterbatasan'] },
+                { name: 'Kesimpulan dan Saran', keys: ['kesimpulan-umum', 'kesimpulan-rumusan', 'saran-praktis', 'saran-lanjutan'] }
+            ];
+            
+            sections.forEach(section => {
+                md += `## ${section.name}\n\n`;
+                section.keys.forEach(key => {
+                    const val = getValue(key);
+                    if (val) md += val + '\n\n';
+                });
+            });
+            
+            // Bibliography
+            md += `## Daftar Pustaka\n\n`;
+            for (let i = 1; i <= bibCounter; i++) {
+                const penulis = getValue(`bib-penulis-${i}`);
+                const tahun = getValue(`bib-tahun-${i}`);
+                const judul = getValue(`bib-judul-${i}`);
+                if (penulis || judul) {
+                    md += `${penulis}. (${tahun}). *${judul}*. ${getValue(`bib-penerbit-${i}`)}. hlm. ${getValue(`bib-hal-${i}`)}.\n\n`;
+                }
+            }
+            
+            // Lampiran
+            if (lampiranFiles.length) {
+                md += `## Lampiran\n\n`;
+                lampiranFiles.forEach(f => md += `- ${f.name}\n`);
+            }
+            
+            return md;
+        }
+
+        function exportHTML() {
+            const paperContent = document.getElementById('paperPreview').innerHTML;
+            return `<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${getValue('title') || 'Research Builder'}</title>
+    <style>
+        body { font-family: Georgia, serif; max-width: 800px; margin: 2rem auto; padding: 2rem; line-height: 1.7; color: #1a1a1a; }
+        .paper-title { font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 1.5rem; }
+        .paper-abstract-label { font-weight: bold; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 0.5rem; }
+        .paper-abstract-content { font-size: 0.9375rem; line-height: 1.7; color: #444; text-align: justify; }
+        .paper-keywords { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #ddd; }
+        .paper-keywords-label { font-weight: bold; font-size: 0.875rem; color: #666; }
+        .paper-keywords-content { font-style: italic; }
+        .paper-section { margin-bottom: 2rem; }
+        .paper-section-title { font-size: 1.125rem; font-weight: bold; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #2563eb; }
+        .paper-subsection { margin-bottom: 1rem; }
+        .paper-subsection-title { font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .paper-content { font-size: 0.9375rem; line-height: 1.7; color: #444; text-align: justify; white-space: pre-wrap; }
+        @media print { body { margin: 0; padding: 1rem; } }
+    </style>
+</head>
+<body>
+${paperContent}
+</body>
+</html>`;
+        }
+
+        // ===================== TOAST =====================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===================== RESET =====================
+        function clearAll() {
+            document.getElementById('resetModal').classList.add('show');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.remove('show');
+        }
+
+        function confirmReset() {
+            localStorage.removeItem('rb_data');
+            localStorage.removeItem('rb_tags');
+            location.reload();
+        }
+
+        // ===================== TOGGLE PREVIEW =====================
+        let previewVisible = true;
+        function togglePreview() {
+            const previewPanel = document.getElementById('previewPanel');
+            const divider = document.getElementById('splitDivider');
+            
+            if (previewVisible) {
+                previewPanel.style.display = 'none';
+                divider.style.display = 'none';
+                document.getElementById('inputPanel').style.flex = '1';
+            } else {
+                previewPanel.style.display = 'flex';
+                divider.style.display = window.innerWidth > 768 ? 'block' : 'block';
+                document.getElementById('inputPanel').style.flex = '1';
+            }
+            previewVisible = !previewVisible;
+        }
+
+        // ===================== RESPONSIVE =====================
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                document.getElementById('mainContainer').style.flexDirection = 'column';
+            } else {
+                document.getElementById('mainContainer').style.flexDirection = 'row';
+            }
+        });
+    </script>
+</body>
+</html>
+
